@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Team Shuffle
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Upload a CSV guest list (e.g. exported from [Luma](https://lu.ma)) and randomly
+split everyone into teams. Built for hackathons and events where you need to
+form balanced groups on the spot.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Import a Luma CSV** — export your event's guest list from Luma and upload it.
+  Columns (name, email, approval status, check-in time) are detected
+  automatically, so no manual mapping is needed.
+- **Filter who gets a team:**
+  - **Approval status** — include/exclude `approved`, `waitlist`, `declined`, etc.
+    (defaults to `approved`).
+  - **Checked-in only** — keep just the people who actually checked in at the
+    event (defaults on when the file has check-in data).
+  - **Remove duplicates** — drop repeated entries by email/name.
+- **Pick a team size** (2–5) and choose what happens when it doesn't divide evenly:
+  - **Separate smaller team** — leftovers form one smaller team.
+  - **Spread into bigger teams** — leftovers join existing teams so no one is left out.
+- **Shuffle** — teams are assigned randomly (Fisher–Yates). Re-shuffle anytime.
+- **Find a name** — search the results to quickly locate someone's team.
+- **Export CSV** — download the final teams as `Team,Name,Email`.
 
-## React Compiler
+## How to use
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. In Luma, open your event → **Guests** → **Export** to download the guest CSV.
+2. Open the app and click **Choose CSV file**, then select that export.
+3. Adjust the filters, team size, and remainder option — the summary shows
+   exactly how many teams you'll get.
+4. Click **Generate teams**, then **Shuffle again** or **Export CSV** as needed.
 
-## Expanding the ESLint configuration
+> Guest lists contain personal data (names, emails). They are parsed entirely in
+> your browser and never uploaded anywhere. `*.csv` files are git-ignored so they
+> can't be committed by accident.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # start the dev server
+npm run build    # production build to dist/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Vite + React + TypeScript. The app is a static SPA — deploy the `dist/` output
+to any static host (e.g. Vercel).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Project structure
+
+```
+src/
+├─ App.tsx, main.tsx        # entry points
+├─ TeamShuffle.tsx          # container: state + screen routing
+├─ TeamShuffle.css
+├─ components/
+│  ├─ LogoBar.tsx
+│  ├─ SetupScreen.tsx       # upload + filters + options form
+│  └─ ResultsScreen.tsx     # generated teams + search/export
+└─ lib/teams.ts             # pure logic: CSV parsing, filtering, shuffling
 ```

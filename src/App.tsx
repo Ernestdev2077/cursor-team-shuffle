@@ -1,7 +1,7 @@
-import HackathonTimer from './HackathonTimer';
+import TeamShuffle from './TeamShuffle';
 
 function App() {
-  return <HackathonTimer />;
+  return <TeamShuffle />;
 }
 
 export default App;
